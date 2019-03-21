@@ -1,0 +1,26 @@
+{
+    "name": "@adaptiveweb/video-audio-description",
+    "version": "1.0.0",
+    "description": "Real-time audio description for videos",
+    "main": "index.ts",
+    "scripts": {
+        "start": "awcli watch",
+        "build": "awcli build"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/TheAdaptiveWeb/VideoAudioDescription.git"
+    },
+    "bugs": {
+        "url": "https://github.com/TheAdaptiveWeb/VideoAudioDescription.git/issues"
+    },
+    "homepage": "https://github.com/TheAdaptiveWeb/VideoAudioDescription.git#readme",
+    "author": "adamhirst",
+    "license": "MPL-2.0",
+    "dependencies": {
+        "adaptiveweb": "^1.0.1-alpha5",
+        "ts-loader": "^5.3.3",
+        "typescript": "^3.3.4000",
+        "webpack": "^4.29.6"
+    }
+}
