@@ -29,7 +29,7 @@ export default class FrameBuffer {
      */
     push(image: CanvasImageSource) {
         if (this.context === null) return;
-        this.context.drawImage(this.canvas, this.stepWidth, 0, this.stepWidth, this.stepHeight, 0, 0, this.stepWidth, this.stepHeight);
+        this.context.drawImage(this.canvas, 0, 0, this.stepWidth, this.stepHeight, this.stepWidth, 0, this.stepWidth, this.stepHeight);
         this.context.drawImage(image, 0, 0, this.width, this.height, 0, 0, this.stepWidth, this.stepHeight);
     }
 

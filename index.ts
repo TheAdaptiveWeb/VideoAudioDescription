@@ -5,5 +5,5 @@ declare const aw: AdapterContext;
 declare const window: Window;
 
 aw.getPreferences().then((preferences: Preferences) => {
-    new AdapterManager(window, preferences);
+    new AdapterManager(aw, window, preferences);
 });

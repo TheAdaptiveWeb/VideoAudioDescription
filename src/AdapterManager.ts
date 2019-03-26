@@ -27,7 +27,7 @@ export default class AdapterManager {
         
         for (let i = 0; i < videoNodes.length; i++) {
             let el = videoNodes[i];
-            this.videos.push(new DescribableVideoElement(el));
+            this.videos.push(new DescribableVideoElement(this.aw, el));
         }
     }
 
