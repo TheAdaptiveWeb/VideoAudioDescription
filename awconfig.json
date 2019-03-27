@@ -6,5 +6,31 @@
     "script": "index.ts",
     "webpackConfig": "./webpack.config.js",
     "tags": [ "vision", "screen readers" ],
-    "author": "adamhirst"
+    "author": "adamhirst",
+    "preferenceSchema": {
+        "autoplay": {
+            "friendlyName": "Autoplay",
+            "default": true,
+            "type": "switch",
+            "description": "Start describing a video as soon as one is detected on the page and is playing."
+        },
+        "waitTime": {
+            "friendlyName": "Wait time",
+            "default": "3",
+            "type": "text",
+            "description": "The amount of time (in seconds) the video will remain paused for while reading a description. Defaults to 3 seconds."
+        },
+        "cooldown": {
+            "friendlyName": "Description cool down",
+            "default": "5",
+            "type": "text",
+            "description": "The time (in seconds) that the adapter waits after providing a description before generating the next description. Defaults to 5 seconds."
+        },
+        "overlayEnabled": {
+            "friendlyName": "Overlay",
+            "default": true,
+            "type": "switch",
+            "description": "Enables or disables the video overlay. If set to false, you will still be able to use a screen reader to interact with the descriptions."
+        }
+    }
 }
