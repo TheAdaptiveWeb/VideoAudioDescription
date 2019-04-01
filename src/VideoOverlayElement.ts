@@ -1,3 +1,6 @@
+import { Preferences } from './Preferences';
+import { AdapterContext, AWCard, AWText, AWButton } from 'adaptiveweb';
+
 /**
  *  Copyright 2019 The Adaptive Web. All Rights Reserved.
  * 
@@ -14,35 +17,49 @@
  */
 
 /**
- * Inner div styles
- */
-const inner =
-`<div style="background-color: #fff; color: #000; font-size: 18px; box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.5); margin: 20px; border-radius: 3px; padding: 10px 10px; font-family: 'Nunito', sans-serif; max-width: 500px; display: flex; align-items: center;">
-    <div style="flex-grow: 1; padding-left: 10px;"></div>
-    <button style="background-color: #62A8E8; color: #fff; box-shadow: 0px 1px 1px 0px rgba(0,0,0,0.5); border-radius: 3px; text-transform: uppercase; font-family: 'Nunito', sans-serif; display: inline-block; font-size: 14px; border: none; padding: 8px 20px; margin-left: 20px;">Start Audio Description</button>
-</div>`
-
-/**
  * The overlay added to a video
  */
 export default class VideoOverlayElement {
 
-    el: HTMLDivElement;
-    adEl: HTMLDivElement;
-    btnEl: HTMLDivElement;
+    card: AWCard;
+    text: AWText;
+    button: AWButton;
+
     running: boolean;
+    preferences: Preferences;
+    aw: AdapterContext;
 
-    constructor(parent: Element, running = false) {
+    constructor(aw: AdapterContext, parent: Element, preferences: Preferences, onBtnClick: Function) {
+        this.aw = aw;
         this.running = false;
-        this.el = document.createElement('div');
-        this.el.style.position = 'relative';
-        this.el.innerHTML = inner;
-        this.adEl = (<any>this.el).children[0].children[0];
-        this.btnEl = (<any>this.el).children[0].children[1];
+        this.preferences = preferences;
+    
+        this.button = aw.ui.button('Stop Audio Description', () => {
+            this.switchState();
+            onBtnClick(this.running);
+        }, 'default', {
+            marginLeft: '20px'
+        });
 
-        if (running) this.switchState();
+        this.text = aw.ui.text('Testing', undefined, {
+            flexGrow: '1',
+            paddingLeft: '10px'
+        });
 
-        parent.appendChild(this.el);
+        this.card = aw.ui.card([this.text, this.button], {
+            maxWidth: '500px', 
+            display: 'flex',
+            alignItems: 'center',
+            position: 'relative',
+            margin: '20px'
+        });
+
+        if (!preferences.overlayEnabled) {
+            // Hide from sighted users
+            this.card.setSightedVisibility(false);
+        }
+
+        parent.appendChild(this.card.element);
     }
 
     /**
@@ -50,10 +67,9 @@ export default class VideoOverlayElement {
      * @param str the text to update
      */
     update(str = '') {
-        this.adEl.innerHTML = str;
-        // this.adEl.setAttribute('aria-label', str);
-        this.adEl.setAttribute('aria-live', str);
-        this.adEl.focus();
+        this.text.setText(str);
+        this.text.element.setAttribute('aria-live', str);
+        this.text.element.focus();
     }
 
     /**
@@ -63,11 +79,19 @@ export default class VideoOverlayElement {
         this.running = !this.running;
 
         if (this.running) {
-            this.adEl.innerHTML = '<i>Audio descriptions will appear here</i>';
-            this.btnEl.innerHTML = 'Stop Audio Description';
+            this.text.element.innerHTML = '<i>Audio descriptions will appear here</i>';
+            this.button.setText('Stop Audio Description');
         } else {
-            this.btnEl.innerHTML = 'Start Audio Description';
+            this.button.setText('Start Audio Description');
         }
+    }
+
+    /**
+     * Sets the state
+     * @param newState the state to set
+     */
+    setState(newState: boolean) {
+        if (newState !== this.running) this.switchState();
     }
 
 }

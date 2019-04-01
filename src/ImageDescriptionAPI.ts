@@ -24,6 +24,7 @@ export function describeImage(aw: AdapterContext, blob: Blob | null): Promise<st
     return aw.request('https://api.adaptiveweb.io/describe', new XHROptions({
         method: 'POST',
         data: blob,
+        withCredentials: true,
         headers: {
             'Content-Type': 'application/octet-stream',
             'Accept':       'application/json, text/*'

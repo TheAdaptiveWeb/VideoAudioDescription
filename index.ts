@@ -13,11 +13,13 @@
  *  permissions and limitations under the License.
  */
 import { AdapterContext } from 'adaptiveweb';
-import Preferences from './src/Preferences';
+import { Preferences, preferencesFromObject } from './src/Preferences';
 import AdapterManager from './src/AdapterManager';
 declare const aw: AdapterContext;
 declare const window: Window;
 
-aw.getPreferences().then((preferences: Preferences) => {
+aw.getPreferences().then((rawPrefs: any) => {
+    let preferences: Preferences = preferencesFromObject(rawPrefs);
     new AdapterManager(aw, window, preferences);
+    console.log('hi');
 });

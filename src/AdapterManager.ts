@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import Preferences from 'src/Preferences';
+import { Preferences } from 'src/Preferences';
 import { AdapterContext } from 'adaptiveweb';
 import DescribableVideoElement from './DescribableVideoElement';
 
@@ -30,7 +30,7 @@ export default class AdapterManager {
         this.window = window;
         this.preferences = preferences;
 
-        console.log('[Adaptive Web][video-audio-description] Initiated!');
+        console.log('[Adaptive Web][video-audio-description] Initiated with preferences:', preferences);
 
         this.findVideoElements();
         console.log('[Adaptive Web][video-audio-description] Found ' + this.videos.length + ' videos!');

@@ -13,11 +13,11 @@
  *  permissions and limitations under the License.
  */
 
- import FrameBuffer from './FrameBuffer';
+import FrameBuffer from './FrameBuffer';
 import { AdapterContext } from 'adaptiveweb';
 import { describeImage } from './ImageDescriptionAPI';
 import VideoOverlayElement from './VideoOverlayElement';
-import Preferences from './Preferences';
+import { Preferences } from './Preferences';
 
 let indexCounter = 0;
 
@@ -63,6 +63,14 @@ export default class DescribableVideoElement {
      * The preferences of the adapter
      */
     preferences: Preferences;
+    /**
+     * The time at which the last description occured
+     */
+    lastDescriptionTime: number = 0;
+    /**
+     * Flag to ignore events (for use when changing playing state)
+     */
+    ignoreEvents: boolean = false;
 
     /**
      * Wrap a HTMLVideoElement into a DescribableVideoElement
@@ -76,7 +84,14 @@ export default class DescribableVideoElement {
         this.preferences = preferences;
         this.element = videoElement;
         if (this.element.parentElement !== null)
-            this.overlay = new VideoOverlayElement(this.element.parentElement, true);
+            this.overlay = new VideoOverlayElement(
+                this.aw,
+                this.element.parentElement, 
+                this.preferences, 
+                (running: boolean) => {
+                    if (running) this.startWatching(true);
+                    else this.stopWatching();
+                });
         this.id = id;
         this.buffer = new FrameBuffer(
             videoElement.videoWidth || videoElement.width, 
@@ -84,6 +99,7 @@ export default class DescribableVideoElement {
         );
 
         if (!this.element.paused) {
+            if (this.overlay !== undefined) this.overlay.setState(true);
             this.startWatching();
         }
 
@@ -95,40 +111,52 @@ export default class DescribableVideoElement {
     /**
      * Describe the current frame of the video
      */
-    describeFrame(): Promise<string> {
+    describeFrame() {
+        if (Date.now() - this.lastDescriptionTime < this.preferences.cooldown + this.preferences.waitTime) return;
+
         let canvas = document.createElement('canvas');
         canvas.width = 300;
         canvas.height = 168;
 
         let ctx = canvas.getContext('2d');
-        if (ctx === null) return Promise.reject<string>('Could not initiate canvas');
+        if (ctx === null) return;
         let videoWidth = this.element.videoWidth || this.element.width;
         let videoHeight = this.element.videoHeight || this.element.height;
         ctx.drawImage(this.element, 0, 0, videoWidth, videoHeight, 0, 0, 300, 168);
 
-        return new Promise<string>((resolve, reject) => {
-            canvas.toBlob((blob: Blob | null) => {
-                describeImage(this.aw, blob).then(description => {
-                    if (description !== undefined) {
-                        if (this.overlay !== undefined) {
-                            this.overlay.update(description);
-                        }
+        canvas.toBlob((blob: Blob | null) => {
+            describeImage(this.aw, blob).then(description => {
+                if (description !== undefined) {
+                    if (this.overlay !== undefined) {
+                        this.overlay.update(description);
+                        this.ignoreEvents = true;
+                        this.element.pause();
+                        setTimeout(() => {
+                            this.element.play();
+                            this.element.focus();
+                            this.ignoreEvents = false;
+                        }, this.preferences.waitTime * 1000);
+                        this.lastDescriptionTime = Date.now();
                     }
-                });
+                }
             });
         });
-        
     }
 
     /**
      * Start watching for scene changes
      */
-    startWatching() {
+    startWatching(userInitiated: boolean = false) {
+        if (this.ignoreEvents) return;
+        if (!userInitiated && !this.preferences.autoplay) return;
+
         console.log('[Adaptive Web][video-audio-description] started watching');
         
         this.watching = true;
         if (this.watcher !== undefined) return;
 
+        if (this.overlay !== undefined) this.overlay.setState(true);
+        
         this.watcher = setInterval(() => {
             if (!this.watching) { 
                 clearInterval(this.watcher); 
@@ -148,7 +176,9 @@ export default class DescribableVideoElement {
      * Stop watching for scene changes
      */
     stopWatching() {
+        if (this.ignoreEvents) return;
         console.log('[Adaptive Web][video-audio-description] stopped watching');
+        if (this.overlay !== undefined) this.overlay.setState(false);
         this.watching = false;
     }
 
