@@ -51,7 +51,8 @@ export default class VideoOverlayElement {
             display: 'flex',
             alignItems: 'center',
             position: 'relative',
-            margin: '20px'
+            top: '20px',
+            left: '20px'
         });
 
         if (!preferences.overlayEnabled) {

@@ -1,7 +1,7 @@
 {
     "name": "Video Audio Description",
     "id": "video-audio-description",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Real-time audio description for videos",
     "script": "index.ts",
     "webpackConfig": "./webpack.config.js",
